@@ -36,6 +36,13 @@ if (!class_exists('Event_Grid_Render')) {
             $date_style     = isset($props['event_date_style']) ? $props['event_date_style'] : '';
             $city_style     = isset($props['event_city_style']) ? $props['event_city_style'] : '';
 
+            // === Récupération des marges et paddings ===
+            $image_margin_padding    = isset($props['event_image_margin_padding']) ? $props['event_image_margin_padding'] : '';
+            $category_margin_padding = isset($props['event_category_margin_padding']) ? $props['event_category_margin_padding'] : '';
+            $title_margin_padding    = isset($props['event_title_margin_padding']) ? $props['event_title_margin_padding'] : '';
+            $date_margin_padding     = isset($props['event_date_margin_padding']) ? $props['event_date_margin_padding'] : '';
+            $city_margin_padding     = isset($props['event_city_margin_padding']) ? $props['event_city_margin_padding'] : '';
+
             // === Génération du CSS dynamique ===
             $output = '<style>
                 .event-grid {
@@ -49,11 +56,11 @@ if (!class_exists('Event_Grid_Render')) {
                     object-fit: cover;
                     display: block;
                 }
-                .event-grid .event-image {' . esc_attr($image_style) . '}
-                .event-grid .event-category {' . esc_attr($category_style) . '}
-                .event-grid .event-title {' . esc_attr($title_style) . '}
-                .event-grid .event-date {' . esc_attr($date_style) . '}
-                .event-grid .event-city {' . esc_attr($city_style) . '}
+                .event-grid .event-image {' . esc_attr($image_style) . esc_attr($image_margin_padding) . '}
+                .event-grid .event-category {' . esc_attr($category_style) . esc_attr($category_margin_padding) . '}
+                .event-grid .event-title {' . esc_attr($title_style) . esc_attr($title_margin_padding) . '}
+                .event-grid .event-date {' . esc_attr($date_style) . esc_attr($date_margin_padding) . '}
+                .event-grid .event-city {' . esc_attr($city_style) . esc_attr($city_margin_padding) . '}
             </style>';
 
             $output .= '<div class="event-grid">';

@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) exit;
 if (!class_exists('Event_Grid_Module')) {
     class Event_Grid_Module extends ET_Builder_Module {
         public $slug       = 'event_grid';
-        public $vb_support = 'on'; // Activer explicitement la compatibilité Visual Builder
+        public $vb_support = 'on';
         public $icon       = 'eicon-posts-grid';
 
         function init() {
@@ -32,7 +32,6 @@ if (!class_exists('Event_Grid_Module')) {
         }
 
         function get_fields() {
-            // Récupération des slugs pour affichage
             $category_slugs = implode(', ', $this->get_category_slugs());
             $localisation_slugs = implode(', ', $this->get_localisation_slugs());
 
@@ -149,11 +148,9 @@ if (!class_exists('Event_Grid_Module')) {
         }
 
         function render($attrs, $render_slug, $content = null) {
-            // Convertir les entrées en tableaux
             $filter_category = !empty($attrs['filter_category']) ? explode(',', $attrs['filter_category']) : array();
             $filter_geozone = !empty($attrs['filter_localisation']) ? explode(',', $attrs['filter_localisation']) : array();
 
-            // Passer les attributs au rendu
             return Event_Grid_Render::render_grid(array(
                 'filter_category' => $filter_category,
                 'filter_geozone' => $filter_geozone,
