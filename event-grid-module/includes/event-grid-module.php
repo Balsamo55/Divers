@@ -114,8 +114,35 @@ if (!class_exists('Event_Grid_Module')) {
                     ),
                 ),
                 'margin_padding' => array(
-                    'css' => array(
-                        'main' => '%%order_class%% .event-item',
+                    'event_image' => array(
+                        'label_prefix' => esc_html__('Image', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-image'),
+                        'tab_slug'     => 'advanced',
+                        'toggle_slug'  => 'image',
+                    ),
+                    'event_category' => array(
+                        'label_prefix' => esc_html__('Category', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-category'),
+                        'tab_slug'     => 'advanced',
+                        'toggle_slug'  => 'category',
+                    ),
+                    'event_title' => array(
+                        'label_prefix' => esc_html__('Title', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-title'),
+                        'tab_slug'     => 'advanced',
+                        'toggle_slug'  => 'title',
+                    ),
+                    'event_date' => array(
+                        'label_prefix' => esc_html__('Date', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-date'),
+                        'tab_slug'     => 'advanced',
+                        'toggle_slug'  => 'date',
+                    ),
+                    'event_city' => array(
+                        'label_prefix' => esc_html__('City', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-city'),
+                        'tab_slug'     => 'advanced',
+                        'toggle_slug'  => 'city',
                     ),
                 ),
             );
@@ -123,13 +150,15 @@ if (!class_exists('Event_Grid_Module')) {
 
         function render($attrs, $render_slug, $content = null) {
             // Convertir les entrées en tableaux
-            $categories = !empty($attrs['filter_category']) ? explode(',', $attrs['filter_category']) : array();
-            $localisations = !empty($attrs['filter_localisation']) ? explode(',', $attrs['filter_localisation']) : array();
+            $filter_category = !empty($attrs['filter_category']) ? explode(',', $attrs['filter_category']) : array();
+            $filter_geozone = !empty($attrs['filter_localisation']) ? explode(',', $attrs['filter_localisation']) : array();
 
             // Passer les attributs au rendu
             return Event_Grid_Render::render_grid(array(
-                'categories' => $categories,
-                'localisations' => $localisations,
+                'filter_category' => $filter_category,
+                'filter_geozone' => $filter_geozone,
+                'columns' => isset($attrs['columns']) ? intval($attrs['columns']) : 3,
+                'grid_gap' => isset($attrs['grid_gap']) ? $attrs['grid_gap'] : '20px',
             ));
         }
 
