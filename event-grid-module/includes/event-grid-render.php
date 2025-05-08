@@ -29,7 +29,14 @@ if (!class_exists('Event_Grid_Render')) {
             error_log('Event Grid Render - Filter Category: ' . print_r($filter_category, true));
             error_log('Event Grid Render - Filter Geozone: ' . print_r($filter_geozone, true));
 
-            // === Injecter CSS directement ===
+            // === Récupération des styles personnalisés ===
+            $image_style    = isset($props['event_image_style']) ? $props['event_image_style'] : '';
+            $category_style = isset($props['event_category_style']) ? $props['event_category_style'] : '';
+            $title_style    = isset($props['event_title_style']) ? $props['event_title_style'] : '';
+            $date_style     = isset($props['event_date_style']) ? $props['event_date_style'] : '';
+            $city_style     = isset($props['event_city_style']) ? $props['event_city_style'] : '';
+
+            // === Génération du CSS dynamique ===
             $output = '<style>
                 .event-grid {
                     display: grid;
@@ -42,6 +49,11 @@ if (!class_exists('Event_Grid_Render')) {
                     object-fit: cover;
                     display: block;
                 }
+                .event-grid .event-image {' . esc_attr($image_style) . '}
+                .event-grid .event-category {' . esc_attr($category_style) . '}
+                .event-grid .event-title {' . esc_attr($title_style) . '}
+                .event-grid .event-date {' . esc_attr($date_style) . '}
+                .event-grid .event-city {' . esc_attr($city_style) . '}
             </style>';
 
             $output .= '<div class="event-grid">';
@@ -68,6 +80,18 @@ if (!class_exists('Event_Grid_Render')) {
             $args = array(
                 'post_type'      => 'evenements',
                 'posts_per_page' => -1,
+                'meta_key'       => 'evenement_date_debut', // Trier par date de début
+                'orderby'        => 'meta_value',
+                'order'          => 'ASC',
+                'meta_type'      => 'DATE',
+                'meta_query'     => array(
+                    array(
+                        'key'     => 'evenement_date_debut',
+                        'value'   => date('Y-m-d'), // Exclure les événements passés
+                        'compare' => '>=',
+                        'type'    => 'DATE',
+                    ),
+                ),
             );
 
             if (count($tax_query) > 1) {
@@ -91,6 +115,7 @@ if (!class_exists('Event_Grid_Render')) {
                     $categories = get_the_terms($post->ID, 'evenements_category');
                     $date       = get_field('evenement_date_debut', $post->ID);
                     $ville      = get_field('evenement_ville', $post->ID);
+                    $permalink  = get_permalink($post->ID); // Lien vers l'événement
 
                     // Fallback pour l'image de catégorie
                     if (empty($image) && !empty($categories) && !is_wp_error($categories)) {
@@ -112,7 +137,7 @@ if (!class_exists('Event_Grid_Render')) {
                         $category_names = join(', ', wp_list_pluck($categories, 'name'));
                     }
 
-                    $output .= '<div class="event-item">';
+                    $output .= '<a href="' . esc_url($permalink) . '" class="event-item">';
                     if ($image) {
                         $output .= '<div class="event-image">' . $image . '</div>';
                     }
@@ -126,7 +151,7 @@ if (!class_exists('Event_Grid_Render')) {
                     if ($ville) {
                         $output .= '<div class="event-city">' . esc_html($ville) . '</div>';
                     }
-                    $output .= '</div>';
+                    $output .= '</a>';
                 }
                 wp_reset_postdata();
             }
