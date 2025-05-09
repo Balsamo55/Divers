@@ -10,6 +10,7 @@ if (!class_exists('Event_Grid_Render')) {
             $grid_gap = isset($props['grid_gap']) ? $props['grid_gap'] : '20px';
             $filter_category = isset($props['filter_category']) ? $props['filter_category'] : [];
             $filter_geozone  = isset($props['filter_geozone']) ? $props['filter_geozone'] : [];
+            $event_limit = isset($props['event_limit']) ? intval($props['event_limit']) : 10; // Limite par défaut à 10
 
             if (!is_array($filter_category)) {
                 $filter_category = explode(',', $filter_category);
@@ -56,7 +57,7 @@ if (!class_exists('Event_Grid_Render')) {
 
             $args = array(
                 'post_type'      => 'evenements',
-                'posts_per_page' => -1,
+                'posts_per_page' => $event_limit, // Limite définie par l'utilisateur
                 'meta_key'       => 'evenement_date_debut',
                 'orderby'        => 'meta_value',
                 'order'          => 'ASC',
@@ -140,7 +141,39 @@ if (!class_exists('Event_Grid_Render')) {
             }
 
             $output .= '</div>';
+
+            // Vérifiez si le nombre total de posts dépasse la limite
+            $total_posts = wp_count_posts('evenements')->publish;
+            if ($total_posts > $event_limit) {
+                $output .= sprintf(
+                    '<button class="load-more-button" data-offset="%s" data-increment="%s" data-ajax-url="%s">%s</button>',
+                    esc_attr($event_limit),
+                    esc_attr($event_limit), // Incrémente par la limite actuelle
+                    esc_url(admin_url('admin-ajax.php')),
+                    esc_html__('Load More', 'event-grid-divi')
+                );
+            }
+
             return $output;
         }
     }
+}
+
+$total_pages = $query->max_num_pages;
+
+
+$total_pages = $query->max_num_pages;
+
+if ($total_pages > 1) {
+    echo '<div class="pagination">';
+    for ($i = 1; $i <= $total_pages; $i++) {
+        echo sprintf(
+            '<a href="#" class="pagination-link" data-page="%d" data-ajax-url="%s" data-nonce="%s">%d</a>',
+            $i,
+            esc_url(admin_url('admin-ajax.php')),
+            esc_attr(wp_create_nonce('pagination_nonce')),
+            $i
+        );
+    }
+    echo '</div>';
 }
