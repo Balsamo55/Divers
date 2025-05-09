@@ -1,0 +1,49 @@
+/* Styles de base pour la pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pagination-link {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 0 5px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #0073e6;
+    text-decoration: none;
+    border: 1px solid #0073e6;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination-link:hover {
+    background-color: #0073e6;
+    color: #ffffff;
+}
+
+.pagination-link.disabled {
+    color: #cccccc;
+    border-color: #cccccc;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* Style pour le lien actif */
+.pagination-link.active {
+    background-color: #0073e6;
+    color: #ffffff;
+    border-color: #0073e6;
+}
+
+/* Responsive design pour petits écrans */
+@media screen and (max-width: 600px) {
+    .pagination-link {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
