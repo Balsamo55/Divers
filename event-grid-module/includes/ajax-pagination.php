@@ -1,43 +1,37 @@
 <?php
-if (!defined('ABSPATH')) exit; // Sécurité
+if (!defined('ABSPATH')) exit;
 
 function ajax_pagination_events() {
-    // Vérifier le nonce pour la sécurité
     if (!check_ajax_referer('pagination_nonce', 'nonce', false)) {
         wp_send_json_error('Nonce invalide.');
         return;
     }
 
-    // Log pour vérifier que la fonction est appelée
-    error_log('AJAX Pagination Triggered');
-
-    // Récupérer le numéro de page depuis les données AJAX
     $paged = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
-    $posts_per_page = 10; // Nombre d'événements par page
+    $posts_per_page = 10;
 
-    // Construire la requête WP_Query
-    $args = array(
-        'post_type'      => 'evenements',
+    $args = [
+        'post_type' => 'evenements',
         'posts_per_page' => $posts_per_page,
-        'paged'          => $paged,
-        'meta_key'       => 'evenement_date_debut',
-        'orderby'        => 'meta_value',
-        'order'          => 'ASC',
-        'meta_type'      => 'DATE',
-        'meta_query'     => array(
-            array(
-                'key'     => 'evenement_date_debut',
-                'value'   => date('Y-m-d'),
+        'paged' => $paged,
+        'meta_key' => 'evenement_date_debut',
+        'orderby' => 'meta_value',
+        'order' => 'ASC',
+        'meta_type' => 'DATE',
+        'meta_query' => [
+            [
+                'key' => 'evenement_date_debut',
+                'value' => date('Y-m-d'),
                 'compare' => '>=',
-                'type'    => 'DATE',
-            ),
-        ),
-    );
+                'type' => 'DATE',
+            ],
+        ],
+    ];
 
     $query = new WP_Query($args);
 
     if ($query->have_posts()) {
-        ob_start(); // Capturer le contenu HTML
+        ob_start();
         while ($query->have_posts()) {
             $query->the_post();
             ?>
@@ -50,16 +44,33 @@ function ajax_pagination_events() {
         }
         wp_reset_postdata();
         $html = ob_get_clean();
+        // --- après ob_get_clean() ---
+$total_pages = $query->max_num_pages;
+$pagination   = '';
 
-        // Log pour vérifier que les posts sont récupérés
-        error_log('Posts récupérés pour la page ' . $paged);
+if ( $total_pages > 1 ) {
+    $pagination .= '<div class="pagination">';
+    for ( $i = 1; $i <= $total_pages; $i++ ) {
+        $pagination .= sprintf(
+            '<a href="?paged=%d" class="pagination-link" data-page="%d" data-ajax-url="%s" data-nonce="%s">%d</a>',
+            $i,
+            $i,
+            esc_url( admin_url('admin-ajax.php') ),
+            esc_attr( wp_create_nonce('pagination_nonce') ),
+            $i
+        );
+    }
+    $pagination .= '</div>';
+}
 
-        wp_send_json_success(array(
-            'html' => $html,
-        ));
+// Renvoi l’HTML des events + la pagination
+wp_send_json_success([
+    'html'       => $html,
+    'pagination' => $pagination,
+]);
+
+        wp_send_json_success(['html' => $html]);
     } else {
-        // Log pour vérifier si aucun post n'est trouvé
-        error_log('Aucun post trouvé pour la page ' . $paged);
         wp_send_json_error('Aucun événement trouvé.');
     }
 }

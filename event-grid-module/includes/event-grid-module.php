@@ -2,6 +2,9 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Inclure le fichier contenant la classe Event_Grid_Render
+require_once plugin_dir_path(__FILE__) . 'event-grid-render.php';
+
 if (!class_exists('Event_Grid_Module')) {
     class Event_Grid_Module extends ET_Builder_Module {
         public $slug       = 'event_grid';
@@ -82,6 +85,20 @@ if (!class_exists('Event_Grid_Module')) {
                     'toggle_slug' => 'layout',
                     'description' => esc_html__('Set the maximum number of events to display.'),
                 ),
+                'item_spacing' => array(
+                    'label'           => esc_html__('Spacing Between Items', 'event-grid-divi'),
+                    'type'            => 'range',
+                    'option_category' => 'layout',
+                    'tab_slug'        => 'style',  // In Style tab
+                    'toggle_slug'     => 'spacing',
+                    'default'         => '20px',
+                    'range_settings'  => [
+                        'min'  => '0px',
+                        'max'  => '100px',
+                        'step' => '1px',
+                    ],
+                    'mobile_options'  => true,
+                ),
             );
         }
 
@@ -131,17 +148,41 @@ if (!class_exists('Event_Grid_Module')) {
                     ),
                 ),
                 'margin_padding' => array(
+                    'event_category' => array(
+                        'label_prefix' => esc_html__('Category', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-category'),
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'category',  // Section Category
+                    ),
+                    'event_title' => array(
+                        'label_prefix' => esc_html__('Title', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-title'),
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'title',  // Section Title
+                    ),
+                    'event_date' => array(
+                        'label_prefix' => esc_html__('Date', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-date'),
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'date',  // Section Date
+                    ),
+                    'event_city' => array(
+                        'label_prefix' => esc_html__('City', 'event-grid-divi'),
+                        'css'          => array('main' => '%%order_class%% .event-city'),
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'city',  // Section City
+                    ),
                     'event_image' => array(
                         'label_prefix' => esc_html__('Image', 'event-grid-divi'),
                         'css'          => array('main' => '%%order_class%% .event-image'),
-                        'tab_slug'     => 'advanced',
-                        'toggle_slug'  => 'image',
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'image',  // Section Image
                     ),
                     'load_more_button' => array(
                         'label_prefix' => esc_html__('Load More Button', 'event-grid-divi'),
                         'css'          => array('main' => '%%order_class%% .load-more-button'),
-                        'tab_slug'     => 'advanced',
-                        'toggle_slug'  => 'load_more_button',
+                        'tab_slug'     => 'style',  // In Style tab
+                        'toggle_slug'  => 'load_more_button',  // Section Load More Button
                     ),
                 ),
             );
@@ -153,24 +194,20 @@ if (!class_exists('Event_Grid_Module')) {
 
             $event_limit = isset($attrs['event_limit']) ? intval($attrs['event_limit']) : 10;
 
-            $output = Event_Grid_Render::render_grid(array(
+            // Récupérer les événements HTML
+            $events_html = Event_Grid_Render::render_grid(array(
                 'filter_category' => $filter_category,
-                'filter_geozone' => $filter_geozone,
-                'columns' => isset($attrs['columns']) ? intval($attrs['columns']) : 3,
-                'grid_gap' => isset($attrs['grid_gap']) ? $attrs['grid_gap'] : '20px',
-                'event_limit' => $event_limit,
+                'filter_geozone'  => $filter_geozone,
+                'columns'         => isset($attrs['columns']) ? intval($attrs['columns']) : 3,
+                'grid_gap'        => isset($attrs['grid_gap']) ? $attrs['grid_gap'] : '20px',
+                'event_limit'     => $event_limit,
             ));
 
-            if ($event_limit > 0) {
-                $output .= sprintf(
-                    '<button class="load-more-button" data-limit="%s" data-ajax-url="%s">%s</button>',
-                    esc_attr($event_limit),
-                    esc_url(admin_url('admin-ajax.php')),
-                    esc_html__('Load More', 'event-grid-divi')
-                );
-            }
+            return $events_html;
+        }
 
-            return $output;
+        private function generate_pagination($event_limit) {
+            return '';
         }
     }
 }

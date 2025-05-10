@@ -32,7 +32,7 @@ class Event_Grid_Fields {
                 'type'            => 'text',
                 'tab_slug'        => 'design',
                 'toggle_slug'     => 'image',
-                'default'         => '10px',
+                'default'         => '20px',
             ),
             'event_title_margin_bottom' => array(
                 'label'           => esc_html__('Title Bottom Margin', 'event-grid-divi'),

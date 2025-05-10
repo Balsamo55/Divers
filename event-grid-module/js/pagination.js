@@ -1,48 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const paginationLinks = document.querySelectorAll('.pagination-link');
-    const gridContainer = document.querySelector('.event-grid');
+  const gridContainer = document.querySelector('.event-grid');
 
-    if (paginationLinks && gridContainer) {
-        paginationLinks.forEach(link => {
-            link.addEventListener('click', (event) => {
-                event.preventDefault();
+  // Écouteur unique sur le document (ou body)
+  document.body.addEventListener('click', event => {
+    if (!event.target.classList.contains('pagination-link')) return;
+    event.preventDefault();
 
-                const paged = link.dataset.page;
-                const ajaxUrl = link.dataset.ajaxUrl;
-                const nonce = link.dataset.nonce;
+    const link    = event.target;
+    const paged   = link.dataset.page;
+    const ajaxUrl = link.dataset.ajaxUrl;
+    const nonce   = link.dataset.nonce;
 
-                console.log(`Pagination link clicked. Page: ${paged}`);
+    // Supprime l'ancienne barre de pagination
+    const old = document.querySelector('.pagination');
+    if (old) old.remove();
 
-                // Désactiver tous les liens pendant le chargement
-                paginationLinks.forEach(link => link.classList.add('disabled'));
-
-                // Envoyer la requête AJAX
-                fetch(ajaxUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'pagination_events',
-                        nonce: nonce,
-                        paged: paged
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Mettre à jour la grille
-                            console.log('Réponse AJAX reçue avec succès');
-                            gridContainer.innerHTML = data.data.html;
-
-                            // Réactiver les liens après le chargement
-                            paginationLinks.forEach(link => link.classList.remove('disabled'));
-                        } else {
-                            console.error('Erreur AJAX :', data.data);
-                        }
-                    })
-                    .catch(error => console.error('Erreur AJAX :', error));
-            });
-        });
-    } else {
-        console.error('Pagination links or grid container not found.');
-    }
+    // Envoi AJAX
+    fetch(ajaxUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: 'pagination_events',
+        paged: paged,
+        nonce: nonce
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        // Injecte la grille + la pagination
+        gridContainer.innerHTML = data.data.html + data.data.pagination;
+      } else {
+        console.error('Erreur AJAX :', data.data);
+      }
+    })
+    .catch(err => console.error('Erreur AJAX :', err));
+  });
 });
