@@ -95,22 +95,48 @@ function mre_grille_evenements($atts = []) {
     $atts = shortcode_atts([
         'id' => 'mre-resultats'
     ], $atts);
+
     ob_start();
+
+    $args = [
+        'posts_per_page' => 20,
+        'paged' => 1
+    ];
+
     echo '<div id="' . esc_attr($atts['id']) . '">';
-    mre_afficher_resultats();
+    mre_afficher_resultats($args);
+
+    // Vérifie s'il faut afficher le bouton
+    $query = new WP_Query(array_merge($args, [
+        'post_type' => 'evenements',
+        'meta_key' => 'evenement_date_debut',
+        'orderby' => 'meta_value',
+        'order' => 'ASC'
+    ]));
+
+    if ($query->max_num_pages > 1) {
+        echo '<div class="mre-load-more-wrapper" style="text-align:center; margin-top: 2em;">';
+        echo '<button id="mre-load-more" data-page="2">Charger plus</button>';
+        echo '</div>';
+    }
+
     echo '</div>';
+
     return ob_get_clean();
 }
+
 
 // Fonction de rendu de la grille (utilisée dans shortcode + AJAX)
 function mre_afficher_resultats($args = []) {
     if (!is_array($args)) {
         $args = [];
     }
+
     $paged = isset($args['paged']) ? max(1, intval($args['paged'])) : 1;
+
     $defaults = [
         'post_type' => 'evenements',
-        'posts_per_page' => -1,
+        'posts_per_page' => 20,
         'paged' => $paged,
         'meta_key' => 'evenement_date_debut',
         'orderby' => 'meta_value',
@@ -126,7 +152,9 @@ function mre_afficher_resultats($args = []) {
         'tax_query' => [],
         's' => ''
     ];
-    $query = new WP_Query(wp_parse_args($args, $defaults));
+
+    // ⚠️ Use array_merge to prioritize $args over $defaults
+    $query = new WP_Query(array_merge($defaults, $args));
 
     if ($query->have_posts()) {
         echo '<div class="mre-grille">';
@@ -153,18 +181,10 @@ function mre_afficher_resultats($args = []) {
     } else {
         echo '<p>Aucun événement trouvé.</p>';
     }
-    wp_reset_postdata();
 
-        $big = 999999999;
-        $total_pages = $query->max_num_pages;
-        if ($total_pages > 1) {
-            echo '<div class="mre-pagination">';
-            for ($i = 1; $i <= $total_pages; $i++) {
-                echo '<a href="#" data-page="' . $i . '">' . $i . '</a> ';
-            }
-            echo '</div>';
-        }
+    wp_reset_postdata();
 }
+
 
 // Handler AJAX pour suggestions ville (version statique optimisée)
 add_action('wp_ajax_mre_suggestions_ville', 'mre_suggestions_ville');
@@ -363,11 +383,31 @@ $titre = isset($_POST['recherche']) ? sanitize_text_field($_POST['recherche']) :
         ];
     }
 
-mre_afficher_resultats([
-    'posts_per_page' => -1,
+$args = [
+    'post_type' => 'evenements',
+    'posts_per_page' => 20,
+    'paged' => $paged,
     'meta_query' => $meta_query,
     'tax_query' => $tax_query,
-    's' => $titre
-]);
+    's' => $titre,
+    'meta_key' => 'evenement_date_debut',
+    'orderby' => 'meta_value',
+    'order' => 'ASC'
+];
+
+// Affichage des événements
+mre_afficher_resultats($args);
+
+// Vérifie s’il reste des pages
+$query = new WP_Query($args);
+
+if ($query->max_num_pages > $paged) {
+    $next_page = $paged + 1;
+    echo '<div class="mre-load-more-wrapper" style="text-align:center; margin-top: 2em;">';
+    echo '<button id="mre-load-more" data-page="' . $next_page . '">Charger plus</button>';
+    echo '</div>';
+}
+
+
 
 }

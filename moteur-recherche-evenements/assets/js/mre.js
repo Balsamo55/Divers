@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   console.log("mre.js chargé");
 
-  // Fonction de normalisation (accents + casse)
   const normalize = str =>
     str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
-  // ---------- Autocomplétion pour VILLE ----------
+  // ---------- Autocomplétion VILLE ----------
   const villeInput = document.getElementById('ville');
   const villeBox = document.getElementById('ville-suggestions');
 
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
     villeInput.addEventListener('input', function () {
       const value = this.value;
       villeBox.innerHTML = '';
-
       if (value.length < 1) return;
 
       const matches = window.mreVilles.filter(ville =>
@@ -33,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---------- Autocomplétion pour CATÉGORIE ----------
+  // ---------- Autocomplétion CATÉGORIE ----------
   const catInput = document.getElementById('categorie');
   const catBox = document.getElementById('categorie-suggestions');
 
@@ -41,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
     catInput.addEventListener('input', function () {
       const value = this.value;
       catBox.innerHTML = '';
-
       if (value.length < 1) return;
 
       const matches = window.mreCategories.filter(cat =>
@@ -61,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---------- Fermer les suggestions en cliquant ailleurs ----------
+  // ---------- Fermer les suggestions ----------
   document.addEventListener('click', function (e) {
     if (!villeBox.contains(e.target) && e.target !== villeInput) {
       villeBox.innerHTML = '';
@@ -94,58 +91,71 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---------- Bouton de réinitialisation ----------
+  // ---------- Bouton reset ----------
   const resetBtn = document.getElementById('mre-reset');
   if (resetBtn && form) {
     resetBtn.addEventListener('click', function (e) {
-      e.preventDefault(); // évite le reset natif du navigateur
+      e.preventDefault();
       form.reset();
-
-      // Vide les suggestions
       if (villeBox) villeBox.innerHTML = '';
       if (catBox) catBox.innerHTML = '';
-
       const outputTarget = form.dataset.output || '#mre-resultats';
 
-      // Recharge les événements par défaut (date >= aujourd'hui)
       fetch(mre_ajax.url, {
         method: 'POST',
         body: new URLSearchParams({
-          action: 'mre_filtrer_evenements'
+          action: 'mre_filtrer_evenements',
+          reset: 'true'
         })
       })
-      .then(response => response.text())
+      .then(res => res.text())
       .then(html => {
         document.querySelector(outputTarget).innerHTML = html;
       })
-      .catch(err => console.error("Erreur AJAX réinitialisation :", err));
+      .catch(err => console.error("Erreur AJAX reset :", err));
     });
   }
 
+  // ---------- Flatpickr ----------
   if (typeof flatpickr !== 'undefined') {
-  flatpickr("#date_debut", {
-    dateFormat: "Y-m-d",
-    locale: "fr"
-  });
-  flatpickr("#date_fin", {
-    dateFormat: "Y-m-d",
-    locale: "fr"
-  });
-}
-document.getElementById('mre-reset')?.addEventListener('click', function (e) {
-  setTimeout(() => {
-    fetch(mre_ajax.url, {
-      method: 'POST',
-      body: new URLSearchParams({
-        action: 'mre_filtrer_evenements',
-        reset: 'true'
+    flatpickr("#date_debut", { dateFormat: "Y-m-d", locale: "fr" });
+    flatpickr("#date_fin", { dateFormat: "Y-m-d", locale: "fr" });
+  }
+
+  // ---------- Bouton "Charger plus" ----------
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.id === 'mre-load-more') {
+      e.preventDefault();
+      const button = e.target;
+      const nextPage = button.getAttribute('data-page');
+      const container = button.closest('#mre-resultats');
+      const form = document.querySelector('#mre-form');
+      const formData = new FormData(form);
+      formData.append('action', 'mre_filtrer_evenements');
+      formData.append('paged', nextPage);
+
+      fetch(mre_ajax.url, {
+        method: 'POST',
+        body: formData
       })
-    })
-    .then(res => res.text())
-    .then(html => {
-      document.querySelector('#mre-resultats').innerHTML = html;
-    });
-  }, 100); // Attendre que le formulaire soit vidé
-});
+      .then(response => response.text())
+      .then(html => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+
+        const newCards = tempDiv.querySelectorAll('.mre-carte');
+        const grid = container.querySelector('.mre-grille');
+        newCards.forEach(card => grid.appendChild(card));
+
+        button.parentElement.remove();
+
+        const newButtonWrapper = tempDiv.querySelector('.mre-load-more-wrapper');
+        if (newButtonWrapper && grid) {
+          container.appendChild(newButtonWrapper); // ✅ Correction ici
+        }
+      })
+      .catch(err => console.error("Erreur AJAX chargement + :", err));
+    }
+  });
 
 });
