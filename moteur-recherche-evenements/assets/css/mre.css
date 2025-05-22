@@ -1,0 +1,191 @@
+/* --- Formulaire --- */
+#mre-form {
+  background: #f4f4f4;
+  padding: 1.5em;
+  border-radius: 0;
+  max-width: 300px;
+  font-family: 'Montserrat', sans-serif;
+  color: #444;
+}
+#mre-form label {
+  font-weight: bold;
+  margin-top: 1em;
+  display: block;
+  font-size: 1em;
+}
+#mre-form input[type="text"],
+#mre-form input[type="date"],
+#mre-form select {
+  width: 100%;
+  padding: 0.5em;
+  margin-bottom: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1em;
+}
+#mre-form button {
+  background-color: #e30713;
+  color: white;
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+#mre-form button:hover {
+  background-color: #e34c12;
+}
+
+/* --- Bouton reset --- */
+#mre-reset {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 0.5em;
+  vertical-align: middle;
+  line-height: 1;
+  padding: 0;
+}
+#mre-reset:hover {
+  color: #e30713;
+}
+
+/* Suggestions */
+.mre-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: absolute;
+  z-index: 99;
+  width: 100%;
+}
+.mre-suggestions li {
+  padding: 0.5em;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+.mre-suggestions li:hover {
+  background: #f2f2f2;
+}
+.mre-suggestions:empty {
+  display: none;
+}
+.mre-suggestions {
+  transition: all 0.2s ease-in-out;
+}
+
+
+/* --- Grille d'événements --- */
+.mre-grille {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* ✅ 4 colonnes fixes */
+  gap: 30px 10px; /* ✅ 30px vertical (entre lignes), 10px horizontal (entre colonnes) */
+  margin-top: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+.mre-carte {
+  background: white;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: #444;
+}
+.mre-carte:hover {
+  transform: scale(1.01);
+}
+.mre-img img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
+
+/* ✅ Textes sans marge/padding gauche */
+.mre-categories,
+.mre-carte h3,
+.mre-meta {
+  margin: 0;
+  padding: 0.3em 0 0 0; /* haut/bas uniquement */
+  text-align: left;
+}
+
+/* ✅ Taille de police accrue */
+.mre-categorie {
+  background: #eee;
+  color: #444;
+  padding: 0.3em 0.1em;
+  border-radius: 4px;
+  font-size: 1.3em;
+  margin-right: 0.3em;
+  display: inline-block;
+}
+.mre-carte h3 {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: #e30713
+}
+.mre-meta {
+  font-size: 1.3em;
+  color: #666;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .mre-grille {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes tablette */
+  }
+}
+
+@media (max-width: 600px) {
+  .mre-grille {
+    grid-template-columns: 1fr; /* 1 colonne mobile */
+  }
+}
+
+/* Flatpickr personnalisé */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: #e30713;
+  color: #fff;
+  border-color: #e30713;
+}
+.flatpickr-day:hover {
+  background: #e34c12;
+  color: #fff;
+}
+.flatpickr-months,
+.flatpickr-weekdays {
+  font-family: 'Montserrat', sans-serif;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: #e30713 !important;
+  color: #fff !important;
+  border-color: #e30713 !important;
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:hover.selected {
+  background: #e34c12 !important;
+  color: #fff !important;
+}
+
+input[type="text"],
+input[type="date"],
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 16px; /* évite le zoom sur mobile */
+}
